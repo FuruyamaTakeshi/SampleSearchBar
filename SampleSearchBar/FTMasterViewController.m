@@ -92,11 +92,23 @@
     return cell;
 }
 
+- (NSString *)tableView:(UITableView *)tableView titleForHeaderInSection:(NSInteger)section
+{
+    if (tableView == self.searchDisplayController.searchResultsTableView) {
+        return @"検索結果";
+    }
+    else {
+        return @"一覧";
+    }
+}
+
 - (BOOL)tableView:(UITableView *)tableView canEditRowAtIndexPath:(NSIndexPath *)indexPath
 {
     // Return NO if you do not want the specified item to be editable.
     return YES;
 }
+
+
 
 - (void)tableView:(UITableView *)tableView commitEditingStyle:(UITableViewCellEditingStyle)editingStyle forRowAtIndexPath:(NSIndexPath *)indexPath
 {
@@ -133,17 +145,17 @@
     }
 }
 
+#pragma mark -
+#pragma mark ### delegate
 - (void)searchBarSearchButtonClicked:(UISearchBar *)searchBar
 {
     LOG_METHOD;
-    
 }
 
 - (void)searchBarCancelButtonClicked:(UISearchBar *)searchBar
 {
     LOG_METHOD;
 }
-
 
 #pragma mark -
 #pragma mark ### UISearcheDisplayController delegate
