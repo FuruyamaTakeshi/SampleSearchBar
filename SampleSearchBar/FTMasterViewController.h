@@ -8,6 +8,9 @@
 
 #import <UIKit/UIKit.h>
 
-@interface FTMasterViewController : UITableViewController
+@interface FTMasterViewController : UITableViewController <UISearchBarDelegate, UISearchDisplayDelegate>
+@property (weak, nonatomic) IBOutlet UISearchBar *statusSearchBar;
+@property (strong, nonatomic) NSMutableArray* originalArray;
 
+@property (strong, nonatomic) NSMutableArray* filteredArray;
 @end

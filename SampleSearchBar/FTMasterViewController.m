@@ -30,6 +30,14 @@
 
     UIBarButtonItem *addButton = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemAdd target:self action:@selector(insertNewObject:)];
     self.navigationItem.rightBarButtonItem = addButton;
+
+   self.filteredArray = [NSMutableArray arrayWithArray:_objects];
+    
+//    UISearchDisplayController* searchController = [[UISearchDisplayController alloc] initWithSearchBar:self.statusSearchBar contentsController:self];
+//    searchController.searchResultsDataSource = self;
+//    searchController.searchResultsDelegate = self;
+    
+    
 }
 
 - (void)didReceiveMemoryWarning
@@ -43,9 +51,15 @@
     if (!_objects) {
         _objects = [[NSMutableArray alloc] init];
     }
-    [_objects insertObject:[NSDate date] atIndex:0];
+    if (!_originalArray) {
+        _originalArray = [[NSMutableArray alloc] init];
+    }
+    NSDate* currentDate = [NSDate date];
+    [_objects insertObject:currentDate atIndex:0];
+    [self.originalArray insertObject:[currentDate description] atIndex:0];
     NSIndexPath *indexPath = [NSIndexPath indexPathForRow:0 inSection:0];
     [self.tableView insertRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationAutomatic];
+    [self.filteredArray addObject:[(NSDate *)[_objects objectAtIndex:0] description]];
 }
 
 #pragma mark - Table View
@@ -63,9 +77,14 @@
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
 {
     UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"Cell" forIndexPath:indexPath];
-
-    NSDate *object = _objects[indexPath.row];
-    cell.textLabel.text = [object description];
+    if (tableView==self.searchDisplayController.searchResultsTableView) {
+        cell.textLabel.text = [self.filteredArray objectAtIndex:indexPath.row];
+    }
+    else {
+        NSDate *object = _objects[indexPath.row];
+        cell.textLabel.text = [object description];
+    }
+    
     return cell;
 }
 
@@ -110,4 +129,39 @@
     }
 }
 
+- (void)searchBarSearchButtonClicked:(UISearchBar *)searchBar
+{
+    LOG_METHOD;
+    
+}
+
+- (void)searchBarCancelButtonClicked:(UISearchBar *)searchBar
+{
+    LOG_METHOD;
+}
+
+- (void)filterSearchText:(NSString *)text
+{
+    LOG_METHOD;
+
+    [self.filteredArray removeAllObjects];
+    NSPredicate* predicate = [NSPredicate predicateWithFormat:@"SELF contains[c] %@", text];
+    self.filteredArray = [NSMutableArray arrayWithArray:[self.originalArray filteredArrayUsingPredicate:predicate]];
+    [self.tableView reloadData];
+}
+
+#pragma mark -
+#pragma mark delegate
+
+- (BOOL)searchDisplayController:(UISearchDisplayController *)controller shouldReloadTableForSearchString:(NSString *)searchString
+{
+    [self filterSearchText:searchString];
+    return YES;
+}
+
+- (BOOL)searchDisplayController:(UISearchDisplayController *)controller shouldReloadTableForSearchScope:(NSInteger)searchOption
+{
+    LOG_METHOD;
+    return YES;
+}
 @end
