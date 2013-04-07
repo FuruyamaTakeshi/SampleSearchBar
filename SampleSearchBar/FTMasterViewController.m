@@ -13,6 +13,8 @@
 @interface FTMasterViewController () {
     NSMutableArray *_objects;
 }
+
+- (void)filterSearchText:(NSString *)text;
 @end
 
 @implementation FTMasterViewController
@@ -30,14 +32,7 @@
 
     UIBarButtonItem *addButton = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemAdd target:self action:@selector(insertNewObject:)];
     self.navigationItem.rightBarButtonItem = addButton;
-
-   self.filteredArray = [NSMutableArray arrayWithArray:_objects];
-    
-//    UISearchDisplayController* searchController = [[UISearchDisplayController alloc] initWithSearchBar:self.statusSearchBar contentsController:self];
-//    searchController.searchResultsDataSource = self;
-//    searchController.searchResultsDelegate = self;
-    
-    
+    self.filteredArray = [NSMutableArray arrayWithArray:_objects];
 }
 
 - (void)didReceiveMemoryWarning
@@ -71,12 +66,21 @@
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
-    return _objects.count;
+    if (tableView == self.searchDisplayController.searchResultsTableView) {
+        return [self.filteredArray count];
+    }
+    else {
+        return _objects.count;
+    }
 }
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"Cell" forIndexPath:indexPath];
+    //UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"Cell" forIndexPath:indexPath];
+    UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"Cell"];
+    if (!cell) {
+        cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"Cell"];
+    }
     if (tableView==self.searchDisplayController.searchResultsTableView) {
         cell.textLabel.text = [self.filteredArray objectAtIndex:indexPath.row];
     }
@@ -140,21 +144,13 @@
     LOG_METHOD;
 }
 
-- (void)filterSearchText:(NSString *)text
-{
-    LOG_METHOD;
-
-    [self.filteredArray removeAllObjects];
-    NSPredicate* predicate = [NSPredicate predicateWithFormat:@"SELF contains[c] %@", text];
-    self.filteredArray = [NSMutableArray arrayWithArray:[self.originalArray filteredArrayUsingPredicate:predicate]];
-    [self.tableView reloadData];
-}
 
 #pragma mark -
-#pragma mark delegate
+#pragma mark ### UISearcheDisplayController delegate
 
 - (BOOL)searchDisplayController:(UISearchDisplayController *)controller shouldReloadTableForSearchString:(NSString *)searchString
 {
+    LOG_METHOD;
     [self filterSearchText:searchString];
     return YES;
 }
@@ -164,4 +160,16 @@
     LOG_METHOD;
     return YES;
 }
+
+#pragma mark -
+#pragma mark Private
+
+- (void)filterSearchText:(NSString *)text
+{
+    LOG_METHOD;
+    [self.filteredArray removeAllObjects];
+    NSPredicate* predicate = [NSPredicate predicateWithFormat:@"SELF contains[c] %@", text];
+    self.filteredArray = [NSMutableArray arrayWithArray:[self.originalArray filteredArrayUsingPredicate:predicate]];
+}
+
 @end
